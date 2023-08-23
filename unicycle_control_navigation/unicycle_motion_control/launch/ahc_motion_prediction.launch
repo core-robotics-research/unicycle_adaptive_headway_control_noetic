@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+
+<launch>
+
+    <arg name="pose" default="pose"/>
+    <arg name="goal" default="goal"/>
+
+    <arg name="epsilon_gain" default="0.5"/>
+    <arg name="rate" default="10"/>
+    <arg name="motion_direction" default="bidirectional"/>   <!-- "forward", "backward", "bidirectional" -->
+    <arg name="resolution" default="60"/>
+    
+    <!-- Enable only one of the motion predictions -->
+    <arg name="enable_circle_motion_prediction" default="False"/>
+    <arg name="enable_triangle_motion_prediction" default="True"/>
+    
+    <group if="$(arg enable_circle_motion_prediction)">
+        <!-- Launch circular motion prediction -->
+        <node pkg="unicycle_motion_control" type="ahc_circle_motion_prediction.py" name="ahc_circular_motion_prediction" output="screen">
+
+            <param name="epsilon_gain" value="$(arg epsilon_gain)"/>
+            <param name="rate" value="$(arg rate)"/>
+            <param name="motion_direction" value="$(arg motion_direction)"/>   <!-- "forward", "backward", "bidirectional" -->
+            <param name="resolution" value="$(arg resolution)"/>
+
+            <remap from="pose" to="$(arg pose)"/>
+            <remap from="goal" to="$(arg goal)"/>
+        </node>
+    </group>
+
+    <group if="$(arg enable_triangle_motion_prediction)">
+        <!-- Launch triangular motion prediction -->
+        <node pkg="unicycle_motion_control" type="ahc_triangle_motion_prediction.py" name="ahc_triangular_motion_prediction" output="screen">
+
+            <param name="epsilon_gain" value="$(arg epsilon_gain)"/>
+            <param name="rate" value="$(arg rate)"/>
+            <param name="motion_direction" value="$(arg motion_direction)"/>   <!-- "forward", "backward", "bidirectional" -->
+    
+            <remap from="pose" to="$(arg pose)"/>
+            <remap from="goal" to="$(arg goal)"/>
+        </node>
+    </group>
+
+</launch>

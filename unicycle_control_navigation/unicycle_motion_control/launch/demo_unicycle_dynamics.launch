@@ -1,0 +1,76 @@
+<?xml version="1.0"?>
+
+<launch>
+
+    <arg name="name" default="myrobot"/>
+
+    <arg name="motion_direction" value="bidirectional"/>  <!-- "forward", "backward", "bidirectional" -->
+
+    <arg name="enable_adaptive_headway_controller" default="True"/>
+    <arg name="enable_distance_gradient_controller" default="False"/>
+
+    <!-- Launch an empty gazebo environment -->
+    <include file="$(find simulation_tools)/launch/gazebo_empty.launch"/>
+
+    <!-- Launch teleoperated goal -->
+    <include file="$(find simulation_tools)/launch/goal_position_teleop.launch">
+        <arg name="color" value="Gazebo/Blue"/>
+    </include>
+
+    <!-- Launch a pose-controlled robot -->
+    <include file="$(find simulation_tools)/launch/robocyl.launch">
+        <arg name="name" value="$(arg name)"/>
+        <arg name="laser_visualize" value="false"/>
+        <arg name="enable_unicycle_model" value="true"/>
+    </include>
+
+
+
+    <!-- Launch unicycle controller -->
+    <group if="$(arg enable_adaptive_headway_controller)">
+        <include file="$(find unicycle_motion_control)/launch/adaptive_headway_control.launch" ns="$(arg name)">
+
+            <arg name="pose" value="/mocap/$(arg name)/pose"/>
+            <arg name="goal" value="/mocap/goal/pose"/>
+            <arg name="cmd_vel" value="/$(arg name)/cmd_vel"/>
+
+            <arg name="rate" value="10"/>
+            <arg name="epsilon_gain" default="0.5"/>
+            <arg name="reference_gain" default="1.0"/>
+            <arg name="convergence_tolerance" value="1e-3"/>
+            <arg name="motion_direction" value="$(arg motion_direction)"/> 
+
+        </include>
+    </group>
+
+    <group if="$(arg enable_distance_gradient_controller)">
+        <include file="$(find unicycle_motion_control)/launch/distance_gradient_control.launch" ns="$(arg name)">
+
+            <arg name="pose" value="/mocap/$(arg name)/pose"/>
+            <arg name="goal" value="/mocap/goal/pose"/>
+            <arg name="cmd_vel" value="/$(arg name)/cmd_vel"/>
+
+            <arg name="rate" value="10"/>
+            <arg name="linear_gain" value="1.0"/>
+            <arg name="angular_gain" value="1.0"/>
+            <arg name="convergence_tolerance" value="1e-3"/>
+            <arg name="motion_direction" value="$(arg motion_direction)"/>  <!-- "forward", "backward", "bidirectional" -->
+
+        </include>
+    </group>
+
+
+
+    <!-- Launch unicycle control dynamics -->
+    <include file="$(find unicycle_motion_control)/launch/unicycle_dynamics.launch" ns="$(arg name)">
+
+        <arg name="initial_pose" value="/mocap/$(arg name)/pose"/>
+        <arg name="pose" value="/$(arg name)/pose_ctrl"/>
+        <arg name="cmd_vel" value="/$(arg name)/cmd_vel"/>
+
+        <arg name="rate" value="10"/>
+        <arg name="velocity_decay" default = "0.5"/>
+
+    </include>
+
+</launch>

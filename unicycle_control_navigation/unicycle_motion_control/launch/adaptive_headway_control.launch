@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+
+<launch>
+
+    <arg name="pose" default="pose"/>
+    <arg name="goal" default="goal"/>
+    <arg name="cmd_vel" default="cmd_vel"/>
+
+    <arg name="rate" default="10"/>
+    <arg name="epsilon_gain" default="0.5"/>
+    <arg name="reference_gain" default="1.0"/>
+    <arg name="convergence_tolerance" default="1e-3"/>
+    <arg name="motion_direction" default="bidirectional"/>  <!-- "forward", "backward", "bidirectional" -->
+
+    <node pkg="unicycle_motion_control" type="adaptive_headway_control.py" name="adaptive_headway_control" output="screen">
+        <param name="rate" value="$(arg rate)"/>
+        <param name="epsilon_gain" value="$(arg epsilon_gain)"/>
+        <param name="reference_gain" value="$(arg reference_gain)"/>
+        <param name="convergence_tolerance" value="$(arg convergence_tolerance)"/>
+        <param name="motion_direction" value="$(arg motion_direction)"/>
+
+        <remap from="pose" to="$(arg pose)"/>
+        <remap from="goal" to="$(arg goal)"/>
+        <remap from="cmd_vel" to="$(arg cmd_vel)"/>
+    </node>
+
+</launch>
